@@ -1,0 +1,30 @@
+# Virtual environment
+era5_env/
+
+# Data files
+data/*
+!data/.gitkeep
+
+# Plot files
+plots/*
+!plots/.gitkeep
+
+# Test scripts
+test_*.sh
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+*.egg-info/
+.eggs/
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# OS specific files
+.DS_Store
+Thumbs.db

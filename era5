@@ -1,0 +1,139 @@
+#!/bin/bash
+#
+# ERA5 Tool Wrapper Script
+#
+# This script provides a convenient way to run the ERA5 tool commands.
+#
+
+# Determine the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ENV_DIR="$SCRIPT_DIR/era5_env"
+
+# Function to print usage information
+function print_usage {
+    echo "ERA5 Tool - A tool for downloading and visualizing ERA5 data"
+    echo ""
+    echo "Usage:"
+    echo "  era5 download [options]   Download ERA5 data"
+    echo "  era5 visualize <file>     Visualize ERA5 data"
+    echo "  era5 setup                Set up the environment"
+    echo "  era5 help                 Show this help message"
+    echo ""
+    echo "For more information, run 'era5 help <command>'"
+    echo "Example: era5 help download"
+}
+
+# Function to print command-specific help
+function print_command_help {
+    case "$1" in
+        download)
+            echo "ERA5 Tool - Download ERA5 data"
+            echo ""
+            echo "Usage:"
+            echo "  era5 download --year YYYY --month MM --day DD [options]"
+            echo ""
+            echo "Required options:"
+            echo "  --year YYYY             Year of data to download"
+            echo "  --month MM              Month of data (1-12)"
+            echo "  --day DD                Day of data (1-31)"
+            echo ""
+            echo "Optional options:"
+            echo "  --variables VAR1 VAR2   Space-separated list of variables to download"
+            echo "  --levels LEV1 LEV2      Space-separated list of pressure levels"
+            echo "  --lat_min FLOAT         Minimum latitude"
+            echo "  --lat_max FLOAT         Maximum latitude"
+            echo "  --lon_min FLOAT         Minimum longitude"
+            echo "  --lon_max FLOAT         Maximum longitude"
+            echo "  --output_dir DIR        Directory to save downloaded files"
+            echo ""
+            echo "Example:"
+            echo "  era5 download --year 2023 --month 1 --day 1 --variables temperature --levels 850"
+            ;;
+        visualize)
+            echo "ERA5 Tool - Visualize ERA5 data"
+            echo ""
+            echo "Usage:"
+            echo "  era5 visualize <file> [output_dir]"
+            echo ""
+            echo "Arguments:"
+            echo "  <file>                  Path to NetCDF file"
+            echo "  [output_dir]            Directory to save plots (default: ./plots)"
+            echo ""
+            echo "Example:"
+            echo "  era5 visualize ./data/temperature_850_20230101.nc"
+            ;;
+        setup)
+            echo "ERA5 Tool - Set up the environment"
+            echo ""
+            echo "Usage:"
+            echo "  era5 setup"
+            echo ""
+            echo "This command will create a Python virtual environment and install all required dependencies."
+            ;;
+        *)
+            print_usage
+            ;;
+    esac
+}
+
+# Check if environment is set up
+function check_environment {
+    if [ ! -d "$ENV_DIR" ]; then
+        echo "Error: Environment not found at $ENV_DIR"
+        echo "Please run 'era5 setup' to set up the environment"
+        exit 1
+    fi
+}
+
+# Activate environment
+function activate_environment {
+    check_environment
+    source "$ENV_DIR/bin/activate"
+}
+
+# Main function
+function main {
+    if [ $# -eq 0 ]; then
+        print_usage
+        exit 0
+    fi
+
+    command="$1"
+    shift
+
+    case "$command" in
+        download)
+            activate_environment
+            python "$SCRIPT_DIR/scripts/era5_download.py" "$@"
+            deactivate
+            ;;
+        visualize)
+            if [ $# -eq 0 ]; then
+                echo "Error: Please specify a file to visualize"
+                print_command_help visualize
+                exit 1
+            fi
+            activate_environment
+            python "$SCRIPT_DIR/scripts/era5_visualize.py" "$@"
+            deactivate
+            ;;
+        setup)
+            bash "$SCRIPT_DIR/setup.sh"
+            ;;
+        help)
+            if [ $# -eq 0 ]; then
+                print_usage
+            else
+                print_command_help "$1"
+            fi
+            ;;
+        *)
+            echo "Error: Unknown command '$command'"
+            print_usage
+            exit 1
+            ;;
+    esac
+}
+
+# Run the main function
+main "$@"

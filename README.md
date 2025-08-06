@@ -17,7 +17,7 @@ A simple and efficient tool for downloading ERA5 reanalysis data from the Analys
 
 1. Clone this repository:
    ```bash
-   git clone https://your-repository-url/era5_tool.git
+   git clone https://github.com/Amanpatni211/era5_tool.git
    cd era5_tool
    ```
 
